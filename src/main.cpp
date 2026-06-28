@@ -20,33 +20,27 @@ int main()
         if (command == "exit")
             break;
 
-        CommandType type = parser.parse(command);
+        Command cmd = parser.parse(command);
 
-        switch (type)
-        {
-            case CommandType::CREATE:
-                std::cout << "CREATE command detected\n";
-                break;
+switch(cmd.type)
+{
+    case CommandType::CREATE:
 
-            case CommandType::INSERT:
-                std::cout << "INSERT command detected\n";
-                break;
+        std::cout<<"Command : CREATE\n";
 
-            case CommandType::SELECT:
-                std::cout << "SELECT command detected\n";
-                break;
+        std::cout<<"Table : "<<cmd.tableName<<"\n";
 
-            case CommandType::UPDATE:
-                std::cout << "UPDATE command detected\n";
-                break;
+        std::cout<<"Columns\n";
 
-            case CommandType::DELETE_CMD:
-                std::cout << "DELETE command detected\n";
-                break;
+        for(auto &c : cmd.columns)
+            std::cout<<c<<std::endl;
 
-            default:
-                std::cout << "Unknown command\n";
-        }
+        break;
+
+    default:
+
+        std::cout<<"Unknown command\n";
+}
     }
 
     std::cout << "Database Closed.\n";

@@ -1,21 +1,36 @@
 #include "Parser.h"
 
-CommandType Parser::parse(const std::string& command)
+#include <sstream>
+
+Command Parser::parse(const std::string& command)
 {
+    Command cmd;
+    cmd.type = CommandType::UNKNOWN;
+
     if(command.find("CREATE TABLE") == 0)
-        return CommandType::CREATE;
+    {
+        cmd.type = CommandType::CREATE;
 
-    if(command.find("INSERT INTO") == 0)
-        return CommandType::INSERT;
+        size_t start = command.find("TABLE") + 6;
 
-    if(command.find("SELECT") == 0)
-        return CommandType::SELECT;
+        size_t bracket = command.find("(");
 
-    if(command.find("UPDATE") == 0)
-        return CommandType::UPDATE;
+        cmd.tableName = command.substr(start, bracket-start);
 
-    if(command.find("DELETE") == 0)
-        return CommandType::DELETE_CMD;
+        size_t close = command.find(")");
 
-    return CommandType::UNKNOWN;
+        std::string cols = command.substr(bracket+1,
+                                          close-bracket-1);
+
+        std::stringstream ss(cols);
+
+        std::string col;
+
+        while(getline(ss,col,','))
+        {
+            cmd.columns.push_back(col);
+        }
+    }
+
+    return cmd;
 }

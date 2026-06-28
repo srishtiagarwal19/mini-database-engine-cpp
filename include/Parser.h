@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 enum class CommandType
 {
@@ -12,8 +13,16 @@ enum class CommandType
     UNKNOWN
 };
 
+struct Command
+{
+    CommandType type;
+    std::string tableName;
+    std::vector<std::string> columns;
+    std::vector<std::string> values;
+};
+
 class Parser
 {
 public:
-    CommandType parse(const std::string& command);
+    Command parse(const std::string& command);
 };

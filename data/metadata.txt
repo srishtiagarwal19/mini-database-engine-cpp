@@ -1,0 +1,15 @@
+Student
+id
+name
+age
+
+Employee
+empid
+name
+salary
+
+Student
+id
+name
+age
+

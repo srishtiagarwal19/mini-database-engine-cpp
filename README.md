@@ -109,6 +109,12 @@ MiniDB/
 * Store schema in `metadata.txt`
 * Detect duplicate tables
 
+### Milestone 5
+- Added Database controller class
+- Implemented INSERT INTO SQL parsing
+- Added persistent record insertion into table files
+- Added validation for table existence before inserting
+
 ---
 
 ## 🖥️ Example

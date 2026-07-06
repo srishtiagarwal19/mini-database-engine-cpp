@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
+
 #include "Parser.h"
+#include "Storage.h"
 
 int main()
 {
@@ -9,6 +11,7 @@ int main()
     std::cout << "=================================\n";
 
     Parser parser;
+    Storage storage;
 
     while (true)
     {
@@ -22,25 +25,41 @@ int main()
 
         Command cmd = parser.parse(command);
 
-switch(cmd.type)
-{
-    case CommandType::CREATE:
+        switch (cmd.type)
+        {
+            case CommandType::CREATE:
 
-        std::cout<<"Command : CREATE\n";
+                if (storage.createTable(cmd.tableName, cmd.columns))
+                {
+                    std::cout << "Table created successfully.\n";
+                }
+                else
+                {
+                    std::cout << "Error: Table '" << cmd.tableName
+          << "' already exists.\n";
+                }
 
-        std::cout<<"Table : "<<cmd.tableName<<"\n";
+                break;
 
-        std::cout<<"Columns\n";
+            case CommandType::INSERT:
+                std::cout << "INSERT command detected\n";
+                break;
 
-        for(auto &c : cmd.columns)
-            std::cout<<c<<std::endl;
+            case CommandType::SELECT:
+                std::cout << "SELECT command detected\n";
+                break;
 
-        break;
+            case CommandType::UPDATE:
+                std::cout << "UPDATE command detected\n";
+                break;
 
-    default:
+            case CommandType::DELETE_CMD:
+                std::cout << "DELETE command detected\n";
+                break;
 
-        std::cout<<"Unknown command\n";
-}
+            default:
+                std::cout << "Unknown command\n";
+        }
     }
 
     std::cout << "Database Closed.\n";

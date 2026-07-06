@@ -1,0 +1,12 @@
+# Build folder
+build/
+
+# Generated database files
+data/*.tbl
+data/metadata.txt
+
+# Keep the data folder
+!data/.gitkeep
+
+# VS Code settings
+.vscode/

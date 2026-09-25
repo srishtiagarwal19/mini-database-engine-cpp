@@ -46,9 +46,13 @@ void Database::execute(const std::string& command)
                       << "' does not exist.\n";
         }
     }
+    else if (!cmd.columns.empty())
+    {
+       storage.selectColumns(cmd.tableName, cmd.columns);
+    }
     else
     {
-        std::cout << "Error: Only SELECT * is currently supported.\n";
+        std::cout << "Error: Invalid SELECT query.\n";
     }
 
     break;

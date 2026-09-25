@@ -17,4 +17,8 @@ public:
 
     bool selectAll(
         const std::string& tableName);
+
+bool selectColumns(
+    const std::string& tableName,
+    const std::vector<std::string>& columns);
 };

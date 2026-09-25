@@ -161,3 +161,139 @@ bool Storage::selectAll(const std::string& tableName)
 
     return true;
 }
+bool Storage::selectColumns(
+    const std::string& tableName,
+    const std::vector<std::string>& columns)
+{
+    std::string filename = "data/" + tableName + ".tbl";
+
+    if (!std::filesystem::exists(filename))
+    {
+        return false;
+    }
+
+    // Read metadata to get all column names
+    std::ifstream meta("data/metadata.txt");
+
+    if (!meta)
+    {
+        return false;
+    }
+
+    std::string line;
+    bool foundTable = false;
+    std::vector<std::string> allColumns;
+
+    while (std::getline(meta, line))
+    {
+        if (line == tableName)
+        {
+            foundTable = true;
+            break;
+        }
+    }
+
+    if (foundTable)
+    {
+        while (std::getline(meta, line))
+        {
+            if (line.empty())
+                break;
+
+            allColumns.push_back(line);
+        }
+    }
+
+    meta.close();
+
+    // Find the index of each requested column
+    std::vector<int> columnIndexes;
+
+    for (const auto& requestedColumn : columns)
+    {
+        int index = -1;
+
+        for (size_t i = 0; i < allColumns.size(); i++)
+        {
+            if (allColumns[i] == requestedColumn)
+            {
+                index = static_cast<int>(i);
+                break;
+            }
+        }
+
+        if (index == -1)
+        {
+            std::cout << "Error: Column '" << requestedColumn
+                      << "' does not exist.\n";
+
+            return false;
+        }
+
+        columnIndexes.push_back(index);
+    }
+
+    // Print selected column names
+    for (size_t i = 0; i < columns.size(); i++)
+    {
+        std::cout << columns[i];
+
+        if (i != columns.size() - 1)
+            std::cout << " | ";
+    }
+
+    std::cout << "\n";
+
+    // Separator
+    for (size_t i = 0; i < columns.size(); i++)
+    {
+        std::cout << "--------";
+
+        if (i != columns.size() - 1)
+            std::cout << "-+-";
+    }
+
+    std::cout << "\n";
+
+    // Open table
+    std::ifstream file(filename);
+
+    if (!file)
+    {
+        return false;
+    }
+
+    // Read each record
+    while (std::getline(file, line))
+    {
+        std::stringstream ss(line);
+
+        std::vector<std::string> values;
+        std::string value;
+
+        while (std::getline(ss, value, ','))
+        {
+            values.push_back(value);
+        }
+
+        // Print only requested columns
+        for (size_t i = 0; i < columnIndexes.size(); i++)
+        {
+            int index = columnIndexes[i];
+
+            if (index < static_cast<int>(values.size()))
+            {
+                std::cout << values[index];
+            }
+
+            if (i != columnIndexes.size() - 1)
+                std::cout << " | ";
+        }
+
+        std::cout << "\n";
+    }
+
+    file.close();
+
+    return true;
+}

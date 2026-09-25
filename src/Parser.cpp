@@ -172,13 +172,12 @@ Command Parser::parse(const std::string& command)
         return cmd;
     }
 
-    // ================= SELECT =================
+// ================= SELECT =================
 
 if (lowerCommand.rfind("select", 0) == 0)
 {
     cmd.type = CommandType::SELECT;
 
-    // Find FROM keyword
     size_t fromPos = lowerCommand.find("from");
 
     if (fromPos == std::string::npos)
@@ -188,39 +187,62 @@ if (lowerCommand.rfind("select", 0) == 0)
 
     // Get the part between SELECT and FROM
     std::string selectPart =
-        lowerCommand.substr(6, fromPos - 6);
+        input.substr(6, fromPos - 6);
 
-    // Remove leading spaces
+    // Trim spaces
     while (!selectPart.empty() &&
            std::isspace(static_cast<unsigned char>(selectPart.front())))
     {
         selectPart.erase(selectPart.begin());
     }
 
-    // Remove trailing spaces
     while (!selectPart.empty() &&
            std::isspace(static_cast<unsigned char>(selectPart.back())))
     {
         selectPart.pop_back();
     }
 
-    // Check for SELECT *
+    // SELECT *
     if (selectPart == "*")
     {
         cmd.selectAll = true;
     }
+    else
+    {
+        // SELECT name,age
+        std::stringstream ss(selectPart);
 
-    // Extract table name after FROM
+        std::string column;
+
+        while (std::getline(ss, column, ','))
+        {
+            // Trim spaces
+            while (!column.empty() &&
+                   std::isspace(static_cast<unsigned char>(column.front())))
+            {
+                column.erase(column.begin());
+            }
+
+            while (!column.empty() &&
+                   std::isspace(static_cast<unsigned char>(column.back())))
+            {
+                column.pop_back();
+            }
+
+            cmd.columns.push_back(column);
+        }
+    }
+
+    // Get table name after FROM
     cmd.tableName = input.substr(fromPos + 4);
 
-    // Remove leading spaces
+    // Trim spaces
     while (!cmd.tableName.empty() &&
            std::isspace(static_cast<unsigned char>(cmd.tableName.front())))
     {
         cmd.tableName.erase(cmd.tableName.begin());
     }
 
-    // Remove trailing spaces
     while (!cmd.tableName.empty() &&
            std::isspace(static_cast<unsigned char>(cmd.tableName.back())))
     {

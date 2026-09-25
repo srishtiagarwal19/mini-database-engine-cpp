@@ -16,9 +16,14 @@ enum class CommandType
 struct Command
 {
     CommandType type;
+
     std::string tableName;
+
     std::vector<std::string> columns;
+
     std::vector<std::string> values;
+
+    bool selectAll = false;
 };
 
 class Parser

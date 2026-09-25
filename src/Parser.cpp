@@ -174,11 +174,61 @@ Command Parser::parse(const std::string& command)
 
     // ================= SELECT =================
 
-    if (lowerCommand.rfind("select", 0) == 0)
+if (lowerCommand.rfind("select", 0) == 0)
+{
+    cmd.type = CommandType::SELECT;
+
+    // Find FROM keyword
+    size_t fromPos = lowerCommand.find("from");
+
+    if (fromPos == std::string::npos)
     {
-        cmd.type = CommandType::SELECT;
         return cmd;
     }
+
+    // Get the part between SELECT and FROM
+    std::string selectPart =
+        lowerCommand.substr(6, fromPos - 6);
+
+    // Remove leading spaces
+    while (!selectPart.empty() &&
+           std::isspace(static_cast<unsigned char>(selectPart.front())))
+    {
+        selectPart.erase(selectPart.begin());
+    }
+
+    // Remove trailing spaces
+    while (!selectPart.empty() &&
+           std::isspace(static_cast<unsigned char>(selectPart.back())))
+    {
+        selectPart.pop_back();
+    }
+
+    // Check for SELECT *
+    if (selectPart == "*")
+    {
+        cmd.selectAll = true;
+    }
+
+    // Extract table name after FROM
+    cmd.tableName = input.substr(fromPos + 4);
+
+    // Remove leading spaces
+    while (!cmd.tableName.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.tableName.front())))
+    {
+        cmd.tableName.erase(cmd.tableName.begin());
+    }
+
+    // Remove trailing spaces
+    while (!cmd.tableName.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.tableName.back())))
+    {
+        cmd.tableName.pop_back();
+    }
+
+    return cmd;
+}
 
     // ================= UPDATE =================
 

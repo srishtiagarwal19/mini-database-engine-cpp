@@ -36,11 +36,22 @@ void Database::execute(const std::string& command)
 
             break;
 
-        case CommandType::SELECT:
+       case CommandType::SELECT:
 
-            std::cout << "SELECT will be implemented in Milestone 6.\n";
+    if (cmd.selectAll)
+    {
+        if (!storage.selectAll(cmd.tableName))
+        {
+            std::cout << "Error: Table '" << cmd.tableName
+                      << "' does not exist.\n";
+        }
+    }
+    else
+    {
+        std::cout << "Error: Only SELECT * is currently supported.\n";
+    }
 
-            break;
+    break;
 
         case CommandType::UPDATE:
 

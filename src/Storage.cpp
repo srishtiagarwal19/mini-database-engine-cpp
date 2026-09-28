@@ -297,3 +297,183 @@ bool Storage::selectColumns(
 
     return true;
 }
+bool Storage::selectWhere(
+    const std::string& tableName,
+    const std::vector<std::string>& columns,
+    bool selectAll,
+    const std::string& whereColumn,
+    const std::string& whereValue)
+{
+    std::string filename = "data/" + tableName + ".tbl";
+
+    if (!std::filesystem::exists(filename))
+    {
+        return false;
+    }
+
+    // Read metadata
+    std::ifstream meta("data/metadata.txt");
+
+    if (!meta)
+    {
+        return false;
+    }
+
+    std::string line;
+    bool foundTable = false;
+    std::vector<std::string> allColumns;
+
+    // Find table
+    while (std::getline(meta, line))
+    {
+        if (line == tableName)
+        {
+            foundTable = true;
+            break;
+        }
+    }
+
+    if (foundTable)
+    {
+        while (std::getline(meta, line))
+        {
+            if (line.empty())
+                break;
+
+            allColumns.push_back(line);
+        }
+    }
+
+    meta.close();
+
+    // Find WHERE column index
+    int whereIndex = -1;
+
+    for (size_t i = 0; i < allColumns.size(); i++)
+    {
+        if (allColumns[i] == whereColumn)
+        {
+            whereIndex = static_cast<int>(i);
+            break;
+        }
+    }
+
+    if (whereIndex == -1)
+    {
+        std::cout << "Error: Column '" << whereColumn
+                  << "' does not exist.\n";
+
+        return false;
+    }
+
+    // Determine which columns to print
+    std::vector<int> selectedIndexes;
+
+    if (selectAll)
+    {
+        for (size_t i = 0; i < allColumns.size(); i++)
+        {
+            selectedIndexes.push_back(static_cast<int>(i));
+        }
+    }
+    else
+    {
+        for (const auto& column : columns)
+        {
+            int index = -1;
+
+            for (size_t i = 0; i < allColumns.size(); i++)
+            {
+                if (allColumns[i] == column)
+                {
+                    index = static_cast<int>(i);
+                    break;
+                }
+            }
+
+            if (index == -1)
+            {
+                std::cout << "Error: Column '" << column
+                          << "' does not exist.\n";
+
+                return false;
+            }
+
+            selectedIndexes.push_back(index);
+        }
+    }
+
+    // Print headers
+    for (size_t i = 0; i < selectedIndexes.size(); i++)
+    {
+        std::cout << allColumns[selectedIndexes[i]];
+
+        if (i != selectedIndexes.size() - 1)
+            std::cout << " | ";
+    }
+
+    std::cout << "\n";
+
+    // Separator
+    for (size_t i = 0; i < selectedIndexes.size(); i++)
+    {
+        std::cout << "--------";
+
+        if (i != selectedIndexes.size() - 1)
+            std::cout << "-+-";
+    }
+
+    std::cout << "\n";
+
+    // Read records
+    std::ifstream file(filename);
+
+    if (!file)
+    {
+        return false;
+    }
+
+    while (std::getline(file, line))
+    {
+        std::stringstream ss(line);
+
+        std::vector<std::string> values;
+        std::string value;
+
+        while (std::getline(ss, value, ','))
+        {
+            values.push_back(value);
+        }
+
+        // Check WHERE condition
+        if (whereIndex >= static_cast<int>(values.size()))
+        {
+            continue;
+        }
+
+        if (values[whereIndex] != whereValue)
+        {
+            continue;
+        }
+
+        // Print matching record
+        for (size_t i = 0; i < selectedIndexes.size(); i++)
+        {
+            int index = selectedIndexes[i];
+
+            if (index < static_cast<int>(values.size()))
+            {
+                std::cout << values[index];
+            }
+
+            if (i != selectedIndexes.size() - 1)
+                std::cout << " | ";
+        }
+
+        std::cout << "\n";
+    }
+
+    file.close();
+
+    return true;
+}

@@ -38,7 +38,16 @@ void Database::execute(const std::string& command)
 
        case CommandType::SELECT:
 
-    if (cmd.selectAll)
+    if (cmd.hasWhere)
+    {
+        storage.selectWhere(
+            cmd.tableName,
+            cmd.columns,
+            cmd.selectAll,
+            cmd.whereColumn,
+            cmd.whereValue);
+    }
+    else if (cmd.selectAll)
     {
         if (!storage.selectAll(cmd.tableName))
         {
@@ -48,7 +57,9 @@ void Database::execute(const std::string& command)
     }
     else if (!cmd.columns.empty())
     {
-       storage.selectColumns(cmd.tableName, cmd.columns);
+        storage.selectColumns(
+            cmd.tableName,
+            cmd.columns);
     }
     else
     {

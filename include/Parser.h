@@ -24,6 +24,12 @@ struct Command
     std::vector<std::string> values;
 
     bool selectAll = false;
+
+    std::string whereColumn;
+
+    std::string whereValue;
+
+    bool hasWhere = false;
 };
 
 class Parser

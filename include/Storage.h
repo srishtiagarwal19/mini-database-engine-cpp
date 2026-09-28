@@ -21,4 +21,10 @@ public:
 bool selectColumns(
     const std::string& tableName,
     const std::vector<std::string>& columns);
+    bool selectWhere(
+    const std::string& tableName,
+    const std::vector<std::string>& columns,
+    bool selectAll,
+    const std::string& whereColumn,
+    const std::string& whereValue);
 };

@@ -7,6 +7,31 @@ bool Storage::createTable(
     const std::string& tableName,
     const std::vector<std::string>& columns)
 {
+    // Validate table name
+if (tableName.empty())
+{
+    std::cout << "Error: Table name cannot be empty.\n";
+    return false;
+}
+    // Validate column names
+for (size_t i = 0; i < columns.size(); i++)
+{
+    if (columns[i].empty())
+    {
+        std::cout << "Error: Column name cannot be empty.\n";
+        return false;
+    }
+
+    for (size_t j = i + 1; j < columns.size(); j++)
+    {
+        if (columns[i] == columns[j])
+        {
+            std::cout << "Error: Duplicate column name '"
+                      << columns[i] << "'.\n";
+            return false;
+        }
+    }
+}
     std::string filename = "data/" + tableName + ".tbl";
 
     // Check if table already exists
@@ -52,6 +77,56 @@ bool Storage::insertRecord(
     // Check if table exists
     if (!std::filesystem::exists(filename))
     {
+        std::cout << "Error: Table '" << tableName
+                  << "' does not exist.\n";
+        return false;
+    }
+
+    // Read metadata to find number of columns
+    std::ifstream meta("data/metadata.txt");
+
+    if (!meta)
+    {
+        return false;
+    }
+
+    std::string line;
+    bool foundTable = false;
+    int columnCount = 0;
+
+    // Find the table
+    while (std::getline(meta, line))
+    {
+        if (line == tableName)
+        {
+            foundTable = true;
+            break;
+        }
+    }
+
+    // Count columns
+    if (foundTable)
+    {
+        while (std::getline(meta, line))
+        {
+            if (line.empty())
+                break;
+
+            columnCount++;
+        }
+    }
+
+    meta.close();
+
+    // Validate number of values
+    if (values.size() != static_cast<size_t>(columnCount))
+    {
+        std::cout << "Error: Expected "
+                  << columnCount
+                  << " values, got "
+                  << values.size()
+                  << ".\n";
+
         return false;
     }
 
@@ -59,7 +134,9 @@ bool Storage::insertRecord(
     std::ofstream file(filename, std::ios::app);
 
     if (!file)
+    {
         return false;
+    }
 
     // Write comma-separated values
     for (size_t i = 0; i < values.size(); i++)

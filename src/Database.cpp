@@ -10,31 +10,21 @@ void Database::execute(const std::string& command)
     {
         case CommandType::CREATE:
 
-            if (storage.createTable(cmd.tableName, cmd.columns))
-            {
-                std::cout << "Table created successfully.\n";
-            }
-            else
-            {
-                std::cout << "Error: Table '" << cmd.tableName
-                          << "' already exists.\n";
-            }
+    if (storage.createTable(cmd.tableName, cmd.columns))
+    {
+        std::cout << "Table created successfully.\n";
+    }
 
-            break;
+    break;
 
         case CommandType::INSERT:
 
-            if (storage.insertRecord(cmd.tableName, cmd.values))
-            {
-                std::cout << "Record inserted successfully.\n";
-            }
-            else
-            {
-                std::cout << "Error: Table '" << cmd.tableName
-                          << "' does not exist.\n";
-            }
+    if (storage.insertRecord(cmd.tableName, cmd.values))
+    {
+        std::cout << "Record inserted successfully.\n";
+    }
 
-            break;
+    break;
 
        case CommandType::SELECT:
 

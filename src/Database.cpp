@@ -68,12 +68,29 @@ void Database::execute(const std::string& command)
 
     break;
 
-        case CommandType::UPDATE:
+       case CommandType::UPDATE:
 
-            std::cout << "UPDATE will be implemented in a future milestone.\n";
+    if (!cmd.hasWhere)
+    {
+        std::cout << "Error: UPDATE requires a WHERE condition.\n";
+        break;
+    }
 
-            break;
+    if (storage.updateRecord(
+            cmd.tableName,
+            cmd.updateColumn,
+            cmd.updateValue,
+            cmd.whereColumn,
+            cmd.whereValue))
+    {
+        std::cout << "Record(s) updated successfully.\n";
+    }
+    else
+    {
+        std::cout << "No matching records found or update failed.\n";
+    }
 
+    break;
         case CommandType::DELETE_CMD:
 
             std::cout << "DELETE will be implemented in a future milestone.\n";

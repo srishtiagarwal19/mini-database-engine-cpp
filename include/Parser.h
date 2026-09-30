@@ -30,6 +30,10 @@ struct Command
     std::string whereValue;
 
     bool hasWhere = false;
+
+    std::string updateColumn;
+
+    std::string updateValue;
 };
 
 class Parser

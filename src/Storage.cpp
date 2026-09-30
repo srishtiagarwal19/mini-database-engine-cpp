@@ -477,3 +477,161 @@ bool Storage::selectWhere(
 
     return true;
 }
+bool Storage::updateRecord(
+    const std::string& tableName,
+    const std::string& updateColumn,
+    const std::string& updateValue,
+    const std::string& whereColumn,
+    const std::string& whereValue)
+{
+    std::string filename = "data/" + tableName + ".tbl";
+
+    if (!std::filesystem::exists(filename))
+    {
+        return false;
+    }
+
+    // Read metadata
+    std::ifstream meta("data/metadata.txt");
+
+    if (!meta)
+    {
+        return false;
+    }
+
+    std::string line;
+    bool foundTable = false;
+    std::vector<std::string> columns;
+
+    // Find table
+    while (std::getline(meta, line))
+    {
+        if (line == tableName)
+        {
+            foundTable = true;
+            break;
+        }
+    }
+
+    // Read column names
+    if (foundTable)
+    {
+        while (std::getline(meta, line))
+        {
+            if (line.empty())
+                break;
+
+            columns.push_back(line);
+        }
+    }
+
+    meta.close();
+
+    // Find UPDATE column
+    int updateIndex = -1;
+
+    for (size_t i = 0; i < columns.size(); i++)
+    {
+        if (columns[i] == updateColumn)
+        {
+            updateIndex = static_cast<int>(i);
+            break;
+        }
+    }
+
+    if (updateIndex == -1)
+    {
+        std::cout << "Error: Column '" << updateColumn
+                  << "' does not exist.\n";
+
+        return false;
+    }
+
+    // Find WHERE column
+    int whereIndex = -1;
+
+    for (size_t i = 0; i < columns.size(); i++)
+    {
+        if (columns[i] == whereColumn)
+        {
+            whereIndex = static_cast<int>(i);
+            break;
+        }
+    }
+
+    if (whereIndex == -1)
+    {
+        std::cout << "Error: Column '" << whereColumn
+                  << "' does not exist.\n";
+
+        return false;
+    }
+
+    // Read all records
+    std::ifstream file(filename);
+
+    if (!file)
+    {
+        return false;
+    }
+
+    std::vector<std::vector<std::string>> records;
+
+    while (std::getline(file, line))
+    {
+        std::stringstream ss(line);
+
+        std::vector<std::string> values;
+        std::string value;
+
+        while (std::getline(ss, value, ','))
+        {
+            values.push_back(value);
+        }
+
+        records.push_back(values);
+    }
+
+    file.close();
+
+    // Update matching records
+    bool updated = false;
+
+    for (auto& record : records)
+    {
+        if (whereIndex < static_cast<int>(record.size()) &&
+            record[whereIndex] == whereValue)
+        {
+            if (updateIndex < static_cast<int>(record.size()))
+            {
+                record[updateIndex] = updateValue;
+                updated = true;
+            }
+        }
+    }
+
+    // Rewrite the file
+    std::ofstream output(filename);
+
+    if (!output)
+    {
+        return false;
+    }
+
+    for (const auto& record : records)
+    {
+        for (size_t i = 0; i < record.size(); i++)
+        {
+            output << record[i];
+
+            if (i != record.size() - 1)
+                output << ",";
+        }
+
+        output << "\n";
+    }
+
+    output.close();
+
+    return updated;
+}

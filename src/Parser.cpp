@@ -343,11 +343,125 @@ if (lowerCommand.rfind("select", 0) == 0)
 }
     // ================= UPDATE =================
 
-    if (lowerCommand.rfind("update", 0) == 0)
+if (lowerCommand.rfind("update", 0) == 0)
+{
+    cmd.type = CommandType::UPDATE;
+
+    // Find SET
+    size_t setPos = lowerCommand.find("set");
+
+    // Find WHERE
+    size_t wherePos = lowerCommand.find("where");
+
+    if (setPos == std::string::npos ||
+        wherePos == std::string::npos)
     {
-        cmd.type = CommandType::UPDATE;
         return cmd;
     }
+
+    // Get table name between UPDATE and SET
+    cmd.tableName =
+        input.substr(6, setPos - 6);
+
+    // Trim table name
+    while (!cmd.tableName.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.tableName.front())))
+    {
+        cmd.tableName.erase(cmd.tableName.begin());
+    }
+
+    while (!cmd.tableName.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.tableName.back())))
+    {
+        cmd.tableName.pop_back();
+    }
+
+    // Get SET condition
+    std::string setPart =
+        input.substr(setPos + 3,
+                     wherePos - (setPos + 3));
+
+    // Find =
+    size_t equalPos = setPart.find("=");
+
+    if (equalPos == std::string::npos)
+    {
+        return cmd;
+    }
+
+    cmd.updateColumn = setPart.substr(0, equalPos);
+    cmd.updateValue = setPart.substr(equalPos + 1);
+
+    // Trim update column
+    while (!cmd.updateColumn.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.updateColumn.front())))
+    {
+        cmd.updateColumn.erase(cmd.updateColumn.begin());
+    }
+
+    while (!cmd.updateColumn.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.updateColumn.back())))
+    {
+        cmd.updateColumn.pop_back();
+    }
+
+    // Trim update value
+    while (!cmd.updateValue.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.updateValue.front())))
+    {
+        cmd.updateValue.erase(cmd.updateValue.begin());
+    }
+
+    while (!cmd.updateValue.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.updateValue.back())))
+    {
+        cmd.updateValue.pop_back();
+    }
+
+    // Get WHERE condition
+    std::string wherePart =
+        input.substr(wherePos + 5);
+
+    equalPos = wherePart.find("=");
+
+    if (equalPos == std::string::npos)
+    {
+        return cmd;
+    }
+
+    cmd.whereColumn = wherePart.substr(0, equalPos);
+    cmd.whereValue = wherePart.substr(equalPos + 1);
+
+    // Trim WHERE column
+    while (!cmd.whereColumn.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.whereColumn.front())))
+    {
+        cmd.whereColumn.erase(cmd.whereColumn.begin());
+    }
+
+    while (!cmd.whereColumn.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.whereColumn.back())))
+    {
+        cmd.whereColumn.pop_back();
+    }
+
+    // Trim WHERE value
+    while (!cmd.whereValue.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.whereValue.front())))
+    {
+        cmd.whereValue.erase(cmd.whereValue.begin());
+    }
+
+    while (!cmd.whereValue.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.whereValue.back())))
+    {
+        cmd.whereValue.pop_back();
+    }
+
+    cmd.hasWhere = true;
+
+    return cmd;
+}
 
     // ================= DELETE =================
 

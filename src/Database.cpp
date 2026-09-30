@@ -93,10 +93,25 @@ void Database::execute(const std::string& command)
     break;
         case CommandType::DELETE_CMD:
 
-            std::cout << "DELETE will be implemented in a future milestone.\n";
+    if (!cmd.hasWhere)
+    {
+        std::cout << "Error: DELETE requires a WHERE condition.\n";
+        break;
+    }
 
-            break;
+    if (storage.deleteRecords(
+            cmd.tableName,
+            cmd.whereColumn,
+            cmd.whereValue))
+    {
+        std::cout << "Record(s) deleted successfully.\n";
+    }
+    else
+    {
+        std::cout << "No matching records found or delete failed.\n";
+    }
 
+    break;
         default:
 
             std::cout << "Unknown command.\n";

@@ -35,4 +35,8 @@ public:
         const std::string& updateValue,
         const std::string& whereColumn,
         const std::string& whereValue);
+        bool deleteRecords(
+    const std::string& tableName,
+    const std::string& whereColumn,
+    const std::string& whereValue);
 };

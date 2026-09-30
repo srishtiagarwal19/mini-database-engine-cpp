@@ -465,11 +465,86 @@ if (lowerCommand.rfind("update", 0) == 0)
 
     // ================= DELETE =================
 
-    if (lowerCommand.rfind("delete", 0) == 0)
+if (lowerCommand.rfind("delete", 0) == 0)
+{
+    cmd.type = CommandType::DELETE_CMD;
+
+    // Find FROM
+    size_t fromPos = lowerCommand.find("from");
+
+    // Find WHERE
+    size_t wherePos = lowerCommand.find("where");
+
+    if (fromPos == std::string::npos ||
+        wherePos == std::string::npos)
     {
-        cmd.type = CommandType::DELETE_CMD;
         return cmd;
     }
 
+    // Get table name between FROM and WHERE
+    cmd.tableName =
+        input.substr(fromPos + 4,
+                     wherePos - (fromPos + 4));
+
+    // Trim table name
+    while (!cmd.tableName.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.tableName.front())))
+    {
+        cmd.tableName.erase(cmd.tableName.begin());
+    }
+
+    while (!cmd.tableName.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.tableName.back())))
+    {
+        cmd.tableName.pop_back();
+    }
+
+    // Get WHERE condition
+    std::string wherePart =
+        input.substr(wherePos + 5);
+
+    size_t equalPos = wherePart.find("=");
+
+    if (equalPos == std::string::npos)
+    {
+        return cmd;
+    }
+
+    cmd.whereColumn =
+        wherePart.substr(0, equalPos);
+
+    cmd.whereValue =
+        wherePart.substr(equalPos + 1);
+
+    // Trim WHERE column
+    while (!cmd.whereColumn.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.whereColumn.front())))
+    {
+        cmd.whereColumn.erase(cmd.whereColumn.begin());
+    }
+
+    while (!cmd.whereColumn.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.whereColumn.back())))
+    {
+        cmd.whereColumn.pop_back();
+    }
+
+    // Trim WHERE value
+    while (!cmd.whereValue.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.whereValue.front())))
+    {
+        cmd.whereValue.erase(cmd.whereValue.begin());
+    }
+
+    while (!cmd.whereValue.empty() &&
+           std::isspace(static_cast<unsigned char>(cmd.whereValue.back())))
+    {
+        cmd.whereValue.pop_back();
+    }
+
+    cmd.hasWhere = true;
+
+    return cmd;
+}
     return cmd;
 }

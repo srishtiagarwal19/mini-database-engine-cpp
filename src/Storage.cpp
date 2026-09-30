@@ -635,3 +635,140 @@ bool Storage::updateRecord(
 
     return updated;
 }
+bool Storage::deleteRecords(
+    const std::string& tableName,
+    const std::string& whereColumn,
+    const std::string& whereValue)
+{
+    std::string filename = "data/" + tableName + ".tbl";
+
+    if (!std::filesystem::exists(filename))
+    {
+        return false;
+    }
+
+    // Read metadata
+    std::ifstream meta("data/metadata.txt");
+
+    if (!meta)
+    {
+        return false;
+    }
+
+    std::string line;
+    bool foundTable = false;
+    std::vector<std::string> columns;
+
+    // Find table
+    while (std::getline(meta, line))
+    {
+        if (line == tableName)
+        {
+            foundTable = true;
+            break;
+        }
+    }
+
+    // Read column names
+    if (foundTable)
+    {
+        while (std::getline(meta, line))
+        {
+            if (line.empty())
+                break;
+
+            columns.push_back(line);
+        }
+    }
+
+    meta.close();
+
+    // Find WHERE column
+    int whereIndex = -1;
+
+    for (size_t i = 0; i < columns.size(); i++)
+    {
+        if (columns[i] == whereColumn)
+        {
+            whereIndex = static_cast<int>(i);
+            break;
+        }
+    }
+
+    if (whereIndex == -1)
+    {
+        std::cout << "Error: Column '" << whereColumn
+                  << "' does not exist.\n";
+
+        return false;
+    }
+
+    // Read all records
+    std::ifstream file(filename);
+
+    if (!file)
+    {
+        return false;
+    }
+
+    std::vector<std::vector<std::string>> records;
+
+    while (std::getline(file, line))
+    {
+        std::stringstream ss(line);
+
+        std::vector<std::string> values;
+        std::string value;
+
+        while (std::getline(ss, value, ','))
+        {
+            values.push_back(value);
+        }
+
+        records.push_back(values);
+    }
+
+    file.close();
+
+    // Keep records that DON'T match the WHERE condition
+    std::vector<std::vector<std::string>> remainingRecords;
+
+    bool deleted = false;
+
+    for (const auto& record : records)
+    {
+        if (whereIndex < static_cast<int>(record.size()) &&
+            record[whereIndex] == whereValue)
+        {
+            deleted = true;
+            continue;
+        }
+
+        remainingRecords.push_back(record);
+    }
+
+    // Rewrite the table file
+    std::ofstream output(filename);
+
+    if (!output)
+    {
+        return false;
+    }
+
+    for (const auto& record : remainingRecords)
+    {
+        for (size_t i = 0; i < record.size(); i++)
+        {
+            output << record[i];
+
+            if (i != record.size() - 1)
+                output << ",";
+        }
+
+        output << "\n";
+    }
+
+    output.close();
+
+    return deleted;
+}

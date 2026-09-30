@@ -849,3 +849,74 @@ bool Storage::deleteRecords(
 
     return deleted;
 }
+bool Storage::dropTable(const std::string& tableName)
+{
+    std::string filename = "data/" + tableName + ".tbl";
+
+    if (!std::filesystem::exists(filename))
+    {
+        std::cout << "Error: Table '" << tableName
+                  << "' does not exist.\n";
+        return false;
+    }
+
+    if (!std::filesystem::remove(filename))
+    {
+        std::cout << "Error: Failed to drop table '"
+                  << tableName << "'.\n";
+        return false;
+    }
+
+    // Remove table metadata
+    std::ifstream meta("data/metadata.txt");
+
+    if (meta)
+    {
+        std::vector<std::string> lines;
+        std::string line;
+
+        while (std::getline(meta, line))
+        {
+            lines.push_back(line);
+        }
+
+        meta.close();
+
+        std::vector<std::string> updatedLines;
+        bool skip = false;
+
+        for (const std::string& currentLine : lines)
+        {
+            if (!skip && currentLine == tableName)
+            {
+                skip = true;
+                continue;
+            }
+
+            if (skip && currentLine.empty())
+            {
+                skip = false;
+                continue;
+            }
+
+            if (!skip)
+            {
+                updatedLines.push_back(currentLine);
+            }
+        }
+
+        std::ofstream out("data/metadata.txt");
+
+        for (const std::string& currentLine : updatedLines)
+        {
+            out << currentLine << "\n";
+        }
+
+        out.close();
+    }
+
+    std::cout << "Table '" << tableName
+              << "' dropped successfully.\n";
+
+    return true;
+}

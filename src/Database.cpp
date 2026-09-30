@@ -88,6 +88,17 @@ void Database::execute(const std::string& command)
         std::cout << "Error: DELETE requires a WHERE condition.\n";
         break;
     }
+    case CommandType::DROP:
+
+    if (cmd.tableName.empty())
+    {
+        std::cout << "Error: Table name cannot be empty.\n";
+        break;
+    }
+
+    storage.dropTable(cmd.tableName);
+
+    break;
 
     if (storage.deleteRecords(
             cmd.tableName,

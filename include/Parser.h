@@ -10,6 +10,7 @@ enum class CommandType
     SELECT,
     UPDATE,
     DELETE_CMD,
+    DROP,
     UNKNOWN
 };
 

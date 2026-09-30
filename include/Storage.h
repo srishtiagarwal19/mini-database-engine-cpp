@@ -39,4 +39,6 @@ public:
     const std::string& tableName,
     const std::string& whereColumn,
     const std::string& whereValue);
+    bool dropTable(
+    const std::string& tableName);
 };

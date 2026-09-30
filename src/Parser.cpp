@@ -546,5 +546,23 @@ if (lowerCommand.rfind("delete", 0) == 0)
 
     return cmd;
 }
+if (lowerCommand.rfind("drop", 0) == 0)
+{
+    cmd.type = CommandType::DROP;
+
+    size_t tablePos = lowerCommand.find("table");
+
+    if (tablePos == std::string::npos)
+        return cmd;
+
+cmd.tableName = input.substr(tablePos + 5);
+
+while (!cmd.tableName.empty() && cmd.tableName.front() == ' ')
+    cmd.tableName.erase(cmd.tableName.begin());
+
+while (!cmd.tableName.empty() && cmd.tableName.back() == ' ')
+    cmd.tableName.pop_back();
+    return cmd;
+}
     return cmd;
 }
